@@ -41,6 +41,7 @@ static struct option getopt_long_options[] = {
 #ifndef _WIN32
     { "daemonize", 0, NULL, 'd' },
 #endif
+    { "ignore-dnssec-option", 0, NULL, 'D' },
     { "ephemeral-keys", 0, NULL, 'E' },
     { "client-key", 1, NULL, 'K' },
     { "resolvers-list", 1, NULL, 'L' },
@@ -76,9 +77,9 @@ static struct option getopt_long_options[] = {
     { NULL, 0, NULL, 0 }
 };
 #ifndef _WIN32
-static const char *getopt_options = "a:de:EhIk:K:L:l:m:n:p:r:R:St:u:N:TVX:Z:";
+static const char *getopt_options = "a:dDe:EhIk:K:L:l:m:n:p:r:R:St:u:N:TVX:Z:";
 #else
-static const char *getopt_options = "a:e:EhIk:K:L:l:m:n:r:R:t:u:N:TVX:";
+static const char *getopt_options = "a:De:EhIk:K:L:l:m:n:r:R:t:u:N:TVX:";
 #endif
 
 #ifndef DEFAULT_CONNECTIONS_COUNT_MAX
@@ -164,6 +165,7 @@ void options_init_with_default(AppContext * const app_context,
     proxy_context->user_dir = NULL;
 #endif
     proxy_context->daemonize = 0;
+    proxy_context->ignore_dnssec = 0;
     proxy_context->test_cert_margin = (time_t) -1;
     proxy_context->test_only = 0;
     proxy_context->tcp_only = 0;
@@ -259,10 +261,12 @@ options_parse_candidate(ProxyContext * const proxy_context,
     if (nologs == NULL || evutil_ascii_strcasecmp(nologs, "no") == 0) {
         return 0;
     }
-    dnssec = options_get_col(headers, headers_count,
-                             cols, cols_count, "DNSSEC validation");
-    if (dnssec == NULL || evutil_ascii_strcasecmp(dnssec, "no") == 0) {
-        return 0;
+    if (!proxy_context->ignore_dnssec) {
+        dnssec = options_get_col(headers, headers_count,
+                                 cols, cols_count, "DNSSEC validation");
+        if (dnssec == NULL || evutil_ascii_strcasecmp(dnssec, "no") == 0) {
+            return 0;
+        }
     }
     resolver_ip = options_get_col(headers, headers_count,
                                   cols, cols_count, "Resolver address");
@@ -683,6 +687,9 @@ options_parse(AppContext * const app_context,
             break;
         case 'd':
             proxy_context->daemonize = 1;
+            break;
+        case 'D':
+            proxy_context->ignore_dnssec = 1;
             break;
         case 'e': {
             char *endptr;

@@ -8,6 +8,7 @@
 static const SimpleConfEntry simpleconf_options[] = {
     {"ClientKey (<any*>)",                                    "--client-key=$0"},
     {"Daemonize? <bool>",                                     "--daemonize"},
+    {"IgnoreDNSSEC? <bool>",                                  "--ignore-dnssec-option"},
     {"EDNSPayloadSize (<digits>)",                            "--edns-payload-size=$0"},
     {"EphemeralKeys? <bool>",                                 "--ephemeral-keys"},
     {"IgnoreTimestamps? <bool>",                              "--ignore-timestamps"},
