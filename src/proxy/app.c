@@ -15,6 +15,7 @@
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
+#include <cap-ng.h>
 
 #if defined(__linux__) && defined(HAVE_LINUX_RANDOM_H)
 # include <sys/ioctl.h>
@@ -213,22 +214,15 @@ revoke_privileges(ProxyContext * const proxy_context)
         exit(1);
     }
     if (proxy_context->user_id != (uid_t) 0) {
-#  ifdef HAVE_INITGROUPS
-        if (initgroups(proxy_context->user_name,
-                       proxy_context->user_group) != 0) {
-            logger(proxy_context, LOG_ERR, "Unable to initialize groups for user [%s]",
-                   proxy_context->user_name);
-            exit(1);
-        }
-#  endif
-        if (setgid(proxy_context->user_group) != 0 ||
-            setegid(proxy_context->user_group) != 0 ||
-            setuid(proxy_context->user_id) != 0 ||
-            seteuid(proxy_context->user_id) != 0) {
+        capng_clear(CAPNG_SELECT_BOTH);
+        capng_updatev(CAPNG_ADD, CAPNG_EFFECTIVE | CAPNG_PERMITTED, CAP_NET_BIND_SERVICE, -1);
+        if (capng_change_id(proxy_context->user_id, proxy_context->user_group,
+            CAPNG_DROP_SUPP_GRP | CAPNG_CLEAR_BOUNDING)) {
             logger(proxy_context, LOG_ERR, "Unable to switch to user id [%lu]",
                    (unsigned long) proxy_context->user_id);
             exit(1);
-        }
+       }
+       capng_apply(CAPNG_SELECT_BOTH);
     }
 # endif
 #endif
@@ -422,6 +416,7 @@ dnscrypt_proxy_main(int argc, char *argv[])
         exit(1);
     }
 #endif
+    revoke_privileges(&proxy_context);
     if (proxy_context.test_only == 0 &&
         (udp_listener_bind(&proxy_context) != 0 ||
          tcp_listener_bind(&proxy_context) != 0)) {
@@ -431,7 +426,6 @@ dnscrypt_proxy_main(int argc, char *argv[])
     signal(SIGPIPE, SIG_IGN);
 #endif
 
-    revoke_privileges(&proxy_context);
     if (cert_updater_start(&proxy_context) != 0) {
         exit(1);
     }
