@@ -57,7 +57,8 @@ AM_CPPFLAGS = \
 
 dnscrypt_proxy_LDADD = \
 	../libevent-modified/libevent_extra.la \
-	../libevent-modified/libevent_core.la
+	../libevent-modified/libevent_core.la \
+	-lcap-ng
 
 dnscrypt_proxy_DEPENDENCIES = \
 	../libevent-modified/libevent_extra.la \
@@ -79,7 +80,7 @@ CLEANFILES = \
 if HAVE_SYSTEMD
 
 dnscrypt_proxy_CFLAGS = $(SYSTEMD_CFLAGS) $(SYSTEMD_DAEMON_CFLAGS)
-dnscrypt_proxy_LDADD += $(SYSTEMD_LIBS) $(SYSTEMD_DAEMON_LIBS) -lcap-ng
+dnscrypt_proxy_LDADD += $(SYSTEMD_LIBS) $(SYSTEMD_DAEMON_LIBS)
 
 endif
 
