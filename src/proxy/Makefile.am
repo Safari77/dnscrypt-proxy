@@ -53,6 +53,8 @@ AM_CFLAGS = @CWFLAGS@
 AM_CPPFLAGS = \
 	-I../ext \
 	-I../libevent-modified/include \
+	-I${srcdir}/../ext \
+	-I${srcdir}/../libevent-modified/include \
 	-DPKGDATADIR='"${pkgdatadir}"'
 
 dnscrypt_proxy_LDADD = \
@@ -68,7 +70,7 @@ BUILT_SOURCES = \
 	probes.h
 
 probes.h: @PROBES_SOURCE@
-	cat @PROBES_SOURCE@ > $@
+	cat $< > $@
 
 probes_dnscrypt_proxy.h: probes_dnscrypt_proxy.d
 	@DTRACE@ -o $@ -h -s probes_dnscrypt_proxy.d
@@ -89,6 +91,7 @@ if PLUGINS
 AM_CPPFLAGS += \
 	$(LTDLINCL) \
 	-I../include \
+	-I${srcdir}/../include \
 	-DPLUGINS_ROOT=\"$(pkglibdir)/\"
 
 dnscrypt_proxy_LDADD += $(LIBLTDL)
