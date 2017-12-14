@@ -125,6 +125,7 @@ options_usage(void)
     const struct option *options = getopt_long_options;
 
     options_version();
+    puts("\nUsage: dnscrypt-proxy <config file> | [<option>, ...]\n");
     puts("\nOptions:\n");
     do {
         if (options->val < 256) {

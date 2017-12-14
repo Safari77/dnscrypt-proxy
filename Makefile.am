@@ -1,14 +1,14 @@
 ACLOCAL_AMFLAGS = -I m4
 
 EXTRA_DIST = \
-	DNSCRYPT-V2-PROTOCOL.txt \
-	README-iOS.markdown \
 	README-PLUGINS.markdown \
 	README-WINDOWS.markdown \
+	README-iOS.markdown \
 	README.markdown \
 	THANKS \
 	apparmor.profile.dnscrypt-proxy \
 	autogen.sh \
+	dnscrypt-protocol/DNSCRYPT-V2-PROTOCOL.txt \
 	dnscrypt-proxy.conf \
 	dnscrypt-proxy.service.in \
 	dnscrypt-proxy.socket \
@@ -29,8 +29,10 @@ SUBDIRS += \
 	test
 
 dist_pkgdata_DATA = \
-	dnscrypt-resolvers.csv \
-	minisign.pub
+	dnscrypt-resolvers/dnscrypt-resolvers.csv \
+	dnscrypt-resolvers/dnscrypt-resolvers.csv.minisig \
+	dnscrypt-resolvers/dnscrypt-resolvers.csv.sig \
+	dnscrypt-resolvers/minisign.pub
 
 doc_DATA = \
 	README.markdown \

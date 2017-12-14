@@ -227,6 +227,7 @@ cert_print_bincert_info(ProxyContext * const proxy_context,
     ts_end_t = (time_t) htonl(ts_end);
     assert(ts_end_t > (time_t) 0);
 
+    memset(&ts_end_tm, 0, sizeof ts_end_tm);
     gm_ret = (gmtime_r(&ts_begin_t, &ts_begin_tm) != NULL &&
               gmtime_r(&ts_end_t, &ts_end_tm) != NULL);
     assert(gm_ret != 0);
@@ -326,7 +327,7 @@ cert_reschedule_query_after_success(ProxyContext * const proxy_context)
                           (CERT_QUERY_RETRY_DELAY_AFTER_SUCCESS_JITTER));
 }
 
-static void
+static int
 cert_check_key_rotation_period(ProxyContext * const proxy_context,
                                const Bincert * const bincert)
 {
@@ -339,10 +340,11 @@ cert_check_key_rotation_period(ProxyContext * const proxy_context,
     ts_end = htonl(ts_end);
     assert(ts_end > ts_begin);
     if (ts_end - ts_begin > CERT_RECOMMENDED_MAX_KEY_ROTATION_PERIOD) {
-        logger_noformat(proxy_context, LOG_INFO,
-                        "The key rotation period for this server may exceed the recommended value. "
-                        "This is bad for forward secrecy.");
+        logger_noformat(proxy_context, LOG_ERR,
+                        "The key rotation period for this server is excessively long");
+        return -1;
     }
+    return 0;
 }
 
 static void
@@ -437,7 +439,13 @@ cert_query_cb(int result, char type, int count, int ttl,
     memcpy(proxy_context->dnscrypt_magic_query, bincert->magic_query,
            sizeof proxy_context->dnscrypt_magic_query);
     cert_print_bincert_info(proxy_context, bincert);
-    cert_check_key_rotation_period(proxy_context, bincert);
+    if (cert_check_key_rotation_period(proxy_context, bincert) != 0) {
+        if (proxy_context->test_only) {
+            exit(DNSCRYPT_EXIT_CERT_NOCERTS);
+        }
+        cert_reschedule_query_after_failure(proxy_context);
+        return;
+    }
     cert_print_server_key(proxy_context);
     dnscrypt_client_init_magic_query(&proxy_context->dnscrypt_client,
                                      bincert->magic_query, cipher);

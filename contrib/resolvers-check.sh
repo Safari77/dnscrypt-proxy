@@ -1,12 +1,12 @@
 #! /bin/sh
 
-RESOLVERS_LIST=dnscrypt-resolvers.csv
-ONLINE_RESOLVERS_LIST=dnscrypt-online-resolvers.csv
+RESOLVERS_LIST=dnscrypt-resolvers/v1/dnscrypt-resolvers.csv
+ONLINE_RESOLVERS_LIST=dnscrypt-resolvers/v1/dnscrypt-online-resolvers.csv
 DNSCRYPT_PROXY=dnscrypt-proxy
 MARGIN=10
 CSV_FILE="${RESOLVERS_LIST}"
 
-tmpfile=$(mktemp .${ONLINE_RESOLVERS_LIST}.XXXXXXXXXXXX) || exit 1
+tmpfile=$(mktemp ${ONLINE_RESOLVERS_LIST}.XXXXXXXXXXXX) || exit 1
 trap "rm -f ${tmpfile}" EXIT
 
 if which csvlint > /dev/null; then

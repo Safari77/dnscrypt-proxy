@@ -59,7 +59,7 @@ echo
 
 env - PATH="$PATH" \
     "$MAKE_TOOLCHAIN" --force --api="$NDK_API_VERSION_COMPAT" \
-    --unified-headers --arch="$ARCH" --install-dir="$TOOLCHAIN_DIR" || exit 1
+    --arch="$ARCH" --install-dir="$TOOLCHAIN_DIR" || exit 1
 
 ./configure \
     --bindir="${PREFIX}/system/xbin" \
